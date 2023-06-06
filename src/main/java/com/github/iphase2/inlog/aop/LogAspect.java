@@ -13,9 +13,15 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 通过注解，固定配置来开启
@@ -74,9 +80,11 @@ public class LogAspect {
         String methodInfo = declaringTypeName + "." + methodName;
         ServletRequestAttributes attributes = null;
         HttpServletRequest request = null;
+        MethodInfo info = new MethodInfo();
         try {
             attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             request = attributes.getRequest();
+            info.setQueryString(request.getQueryString());
         } catch (Exception e) {
             log.error("===> error on autoLog getServlet:", e);
         }
@@ -85,25 +93,34 @@ public class LogAspect {
             log.debug("------------------------------- start --------------------------");
         }
         Object result = null;
-        MethodInfo vo = new MethodInfo();
-        vo.setMethod(request != null ? request.getMethod() : "undefined");
-        vo.setParam(JSON.toJSON(joinPoint.getArgs()));
-        vo.setOriginUrl(request != null ? request.getRequestURL().toString() : null);
-        vo.setInterfaceDesc(methodInfo);
-        vo.setTargetDetail(joinPoint.getTarget().toString());
+        info.setMethod(request != null ? request.getMethod() : "undefined");
+        Object[] args = joinPoint.getArgs();
+        if (Objects.nonNull(args) && args.length > 0) {
+            List<Object> filterArgs = Arrays.stream(args)
+                    .filter(arg -> (!(arg instanceof HttpServletRequest)
+                            && !(arg instanceof HttpServletResponse)
+                            && !(arg instanceof MultipartFile)))
+                    .collect(Collectors.toList());
+            info.setParam(filterArgs);
+        }
+        info.setOriginUrl(request != null ? request.getRequestURL().toString() : null);
+        info.setInterfaceDesc(methodInfo);
+        info.setTargetDetail(joinPoint.getTarget().toString());
         try {
             result = joinPoint.proceed();
         } catch (Throwable e) {
-            vo.setErrorMsg(e.getMessage());
+            info.setErrorMsg(e != null ? e.getMessage() : null);
             log.error("===> An error occurred during around operation:api info: {} ", e);
             throw new RuntimeException(e);
         } finally {
-            vo.setResult(result);
-            vo.setConsumed(System.currentTimeMillis() - begin);
+            if (logProperties.isPrintResult()) {
+                info.setResult(result);
+            }
+            info.setConsumed(System.currentTimeMillis() - begin);
             /**
              * 打印调用方法全路径以及执行方法
              */
-            log.info("===> Request Interface Info: \n{};", JSON.toJSONString(vo, SerializerFeature.PrettyFormat));
+            log.info("===> Request Interface Info: \n{};", JSON.toJSONString(info, SerializerFeature.PrettyFormat));
             if (log.isDebugEnabled()) {
                 log.debug("------------------------------- end --------------------------");
             }

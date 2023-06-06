@@ -21,11 +21,20 @@ public class AutoLogProperties {
 
     public static final String ENABLE = "enable";
     /**
-     * key：controller全路径名或 包路径.* (*为类名)
-     * value：未想好
+     * 全路径名或 包路径.* (*为类名)
      */
     private Set<String> filter;
 
+    private boolean printResult =false;
+
+
+    public boolean isPrintResult() {
+        return printResult;
+    }
+
+    public void setPrintResult(boolean printResult) {
+        this.printResult = printResult;
+    }
 
     /**
      * 是否开启

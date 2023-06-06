@@ -22,6 +22,11 @@ public class MethodInfo {
      * 目标接口参数
      */
     private Object param;
+
+    /**
+     * queryString
+     */
+    private String queryString;
     /**
      * 源URL
      */
@@ -43,6 +48,14 @@ public class MethodInfo {
      * 目标接口信息
      */
     private String targetDetail;
+
+    public String getQueryString() {
+        return queryString;
+    }
+
+    public void setQueryString(String queryString) {
+        this.queryString = queryString;
+    }
 
     public String getTargetDetail() {
         return targetDetail;
