@@ -1,0 +1,4 @@
+# AutoConfigureCache auto-configuration imports
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  com.github.iphase2.inlog.config.AutoConfig
+
