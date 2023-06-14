@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.github.iPhase2</groupId>
     <artifactId>spring-boot-stater-inlog</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-SNAPSHOT</version>
     <name>spring-boot-stater-inlog</name>
     <description>日志拦截记录</description>
     <properties>

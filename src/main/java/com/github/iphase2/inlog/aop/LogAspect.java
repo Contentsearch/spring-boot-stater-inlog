@@ -72,7 +72,6 @@ public class LogAspect {
             }
         }
 
-        // 拦截到的是Feign接口
         String declaringTypeName = getSignature(joinPoint).getDeclaringTypeName();
         // 获取目标类的全路径名
         String methodName = getSignature(joinPoint).getName();
@@ -117,12 +116,12 @@ public class LogAspect {
                 info.setResult(result);
             }
             info.setConsumed(System.currentTimeMillis() - begin);
-            /**
-             * 打印调用方法全路径以及执行方法
-             */
-            log.info("===> Request Interface Info: \n{};", JSON.toJSONString(info, SerializerFeature.PrettyFormat));
-            if (log.isDebugEnabled()) {
-                log.debug("------------------------------- end --------------------------");
+            // 打印调用方法全路径以及执行方法
+            try {
+                log.info("===> Request Interface Info: \n{};", JSON.toJSONString(info, SerializerFeature.PrettyFormat));
+
+            } catch (Exception e) {
+                log.error("Log aspect fastjson serializer error... ignore");
             }
         }
         return result;
